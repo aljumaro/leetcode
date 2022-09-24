@@ -16,53 +16,36 @@ var exist = (board, word) => {
     for (let i = 0; i < board.length; i++) {
         for (let j = 0; j < board[0].length; j++) {
             if (word[0] == board[i][j]) {
-                result = solve(board, word, 1, i, j);
+                result = solve(board, word, 0, i, j);
                 if (result) {
                     return true;
-                }
+                }            
             }
         }
     }
     return result;
 };
 
-var solve = (board, word, wordIndex, i, j, used = {}) => {
-    if (wordIndex == word.length) {
+var solve = (board, word, wordIndex, row, col) => {
+    if (row < 0 || row > board.length -1 || col < 0 || col > board[0].length || word[wordIndex] != board[row][col]) {
+        return false;
+    }
+
+    if (wordIndex == word.length - 1) {
         return true;
     }
-    let key = `${i},${j}`;
-    used[key] = true;
-    let adjacent = adjacents(board, i, j);
-    for (a of adjacent) {
-        let l = a[0], k = a[1];
-        if (board[l][k] == word[wordIndex] && !(`${l},${k}` in used)) {
-            let res = solve(board, word, wordIndex + 1, l, k, used);
-            if (res) {
-                return res;
-            }
-        }
-    }
-    delete used[key];
-    return false;
-}
 
-var adjacents = (board, i, j) => {
-    let result = [];
-    if (i != 0) {
-        result.push([i-1, j]);
-    }
-    if (j != 0) {
-        result.push([i, j-1]);
-    }
-    if (i != board.length-1) {
-        result.push([i+1, j]);
-    }
-    if (j != board[0].length-1) {
-        result.push([i, j+1]);
-    }
-    return result;
-}
+    board[row][col] = "#";
+    
+    let res = solve(board, word, wordIndex + 1, row - 1, col) ||
+        solve(board, word, wordIndex + 1, row, col- 1) ||
+        solve(board, word, wordIndex + 1, row + 1, col) ||
+        solve(board, word, wordIndex + 1, row, col + 1);
 
+    board[row][col] = word[wordIndex];
+
+    return res;
+}
 
 let board = [["A","B","C","E"],["S","F","E","S"],["A","D","E","E"]], word = "ABCESEEEFS";
 console.log(exist(board, word));
